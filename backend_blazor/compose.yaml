@@ -1,0 +1,7 @@
+﻿services:
+  backend_blazor:
+    image: backend_blazor
+    build:
+      context: .
+      dockerfile: backend_blazor/Dockerfile
+

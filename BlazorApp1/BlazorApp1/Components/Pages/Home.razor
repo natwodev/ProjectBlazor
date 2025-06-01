@@ -1,0 +1,46 @@
+﻿@page "/"
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <h1 class="display-4 mb-4">Chào mừng đến với BlazorApp1</h1>
+            <p class="lead mb-4">
+                Đây là trang chủ của ứng dụng Blazor của bạn. Bạn có thể bắt đầu xây dựng ứng dụng của mình từ đây.
+            </p>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Bắt đầu ngay</h5>
+                    <p class="card-text">
+                        Khám phá các tính năng của ứng dụng và bắt đầu xây dựng những gì bạn cần.
+                    </p>
+                    <button class="btn btn-primary" @onclick="NavigateToFeatures">
+                        Xem tính năng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private void NavigateToFeatures()
+    {
+        // TODO: Thêm navigation logic khi bạn có trang tính năng
+    }
+}
+
+<style>
+    .container {
+        padding-top: 2rem;
+    }
+    
+    .card {
+        margin-top: 2rem;
+        border-radius: 10px;
+    }
+    
+    .btn-primary {
+        padding: 0.5rem 2rem;
+        border-radius: 5px;
+    }
+</style>
