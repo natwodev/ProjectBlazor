@@ -1,5 +1,6 @@
-@page "/products"
+@page "/categories"
 @using BlazorApp1.DTOs
+@using BlazorApp1.Services
 <h3>index</h3>
 @inject CategoryService CategoryService
 
@@ -15,8 +16,7 @@ else
         <thead>
         <tr>
             <th>Name</th>
-            <th>Price</th>
-            <th>Category</th>
+            <th>Description</th>
         </tr>
         </thead>
         <tbody>
@@ -24,8 +24,7 @@ else
         {
             <tr>
                 <td>@category.Name</td>
-                <td>@category.Name</td>
-                <td>@category.ProductCount</td>
+                <td>@category.Description</td>
             </tr>
         }
         </tbody>

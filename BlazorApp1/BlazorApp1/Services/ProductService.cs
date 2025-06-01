@@ -1,5 +1,6 @@
-using System.Net.Http.Json;
 using BlazorApp1.DTOs;
+
+namespace BlazorApp1.Services;
 
 public class ProductService
 {
@@ -16,4 +17,3 @@ public class ProductService
         return products ?? new List<ProductDto>();
     }
 }
-

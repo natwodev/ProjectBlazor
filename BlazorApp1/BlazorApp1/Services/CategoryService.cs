@@ -1,5 +1,6 @@
-using System.Net.Http.Json;
 using BlazorApp1.DTOs;
+
+namespace BlazorApp1.Services;
 
 public class CategoryService
 {
@@ -16,4 +17,3 @@ public class CategoryService
         return categorys ?? new List<CategoryDto>();
     }
 }
-

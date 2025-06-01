@@ -1,4 +1,5 @@
 using BlazorApp1.Components;
+using BlazorApp1.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +12,7 @@ builder.Services.AddScoped<CategoryService>();
 
 builder.Services.AddHttpClient("BackendApi", client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5249/"); // Thay đúng URL nếu khác
+    client.BaseAddress = new Uri("http://localhost:5163/"); // Thay đúng URL nếu khác
 });
 
 builder.Services.AddScoped(sp =>
