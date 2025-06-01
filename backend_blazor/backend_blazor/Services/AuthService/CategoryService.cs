@@ -34,17 +34,21 @@ namespace backend_blazor.Services.AuthService
 
         public async Task UpdateAsync(int id, UpdateCategoryDTO dto)
         {
-            var category = await _categoryRepository.GetCategoryDtoByIdAsync(id);
+            var category = await _categoryRepository.GetCategoryByIdAsync(id);
             if (category == null)
             {
                 throw new Exception("Category not found");
             }
 
-            var entity = _mapper.Map<Category>(dto);
-            entity.Id = id;
+            if (dto.Name != null)
+                category.Name = dto.Name;
 
-            await _categoryRepository.UpdateCategoryAsync(entity);
+            if (dto.Description != null)
+                category.Description = dto.Description;
+
+            await _categoryRepository.UpdateCategoryAsync(category);
         }
+
         public async Task<IEnumerable<CategoryDTO>> GetAllAsync()
         {
             return await _categoryRepository.GetAllCategoryDtosAsync();

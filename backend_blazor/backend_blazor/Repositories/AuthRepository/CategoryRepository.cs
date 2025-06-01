@@ -45,6 +45,11 @@ public class CategoryRepository : ICategoryRepository
         return category != null ? _mapper.Map<CategoryDTO>(category) : null;
     }
 
+    public async Task<Category?> GetCategoryByIdAsync(int id)
+    {
+        var category = await _context.Categories.FindAsync(id);
+        return category != null ? _mapper.Map<Category>(category) : null;
+    }
     public async Task<CategoryDTO> CreateAsync(CreateCategoryDTO dto)
     {
         var entity = _mapper.Map<Category>(dto);

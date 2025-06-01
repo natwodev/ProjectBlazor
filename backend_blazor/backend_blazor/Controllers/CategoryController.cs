@@ -28,7 +28,25 @@ namespace backend_blazor.Controllers
             var result = await _categoryService.CreateAsync(dto);
             return Ok(result);
         }
-
-    
+        [HttpPatch("{id}")]
+        public async Task<ActionResult<CategoryDTO>> UpdateCategory(int id, UpdateCategoryDTO dto)
+        {
+            await _categoryService.UpdateAsync(id, dto);
+            return Ok();
+        }
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<bool>> DeleteCategory(int id)
+        {
+            var result = await _categoryService.DeleteAsync(id);
+            return Ok(result);
+        }
+        
+        [HttpGet("{id}")]
+        public async Task<ActionResult<CategoryDTO>> GetCategory(int id)
+        {
+            var result = await _categoryService.GetByIdAsync(id);
+            return Ok(result);
+        }
+        
     }
 }

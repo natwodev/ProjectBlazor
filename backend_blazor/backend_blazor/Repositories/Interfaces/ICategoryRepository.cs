@@ -10,4 +10,5 @@ public interface ICategoryRepository
     Task<CategoryDTO?> GetCategoryDtoByIdAsync(int id);
     Task<CategoryDTO> CreateAsync(CreateCategoryDTO dto);
     Task<IEnumerable<CategoryDTO>> GetAllCategoryDtosAsync();
+    Task<Category?> GetCategoryByIdAsync(int id);
 }

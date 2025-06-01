@@ -17,6 +17,6 @@ public class CreateCategoryDTO
 // DTO cho việc cập nhật category
 public class UpdateCategoryDTO
 {
-    public string Name { get; set; } = string.Empty;
+    public string? Name { get; set; } 
     public string? Description { get; set; }
 }

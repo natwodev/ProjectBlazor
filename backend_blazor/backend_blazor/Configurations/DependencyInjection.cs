@@ -17,12 +17,14 @@ namespace backend_blazor.Configurations
             services.AddScoped<IAuthRepository, AuthRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<IProductRepository, ProductRepository>();
 
             
             // Register Services
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IProductService, ProductService>();
 
             
         }
