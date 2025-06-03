@@ -1,0 +1,28 @@
+@page "/categories/create"
+@using BlazorApp2.Services
+@inject CategoryService CategoryService
+@inject NavigationManager NavigationManager
+
+<h3>Thêm danh mục</h3>
+
+<div class="mb-3">
+    <label for="name" class="form-label">Tên</label>
+    <input id="name" class="form-control" @bind="category.Name" />
+</div>
+
+<div class="mb-3">
+    <label for="description" class="form-label">Ghi chú</label>
+    <textarea id="description" class="form-control" @bind="category.Description"></textarea>
+</div>
+
+<button class="btn btn-success" @onclick="SaveCategory">Lưu</button>
+
+@code {
+    private CategoryDto category = new();
+
+    private async Task SaveCategory()
+    {
+        await CategoryService.CreateCategoryAsync(category);
+        NavigationManager.NavigateTo("/categories");
+    }
+}

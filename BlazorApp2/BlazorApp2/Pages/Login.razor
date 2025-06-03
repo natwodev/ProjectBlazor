@@ -1,0 +1,61 @@
+@page "/login"
+
+@using BlazorApp2.Services
+@inject AuthService AuthService
+
+<h3>Đăng nhập</h3>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<EditForm Model="this" OnValidSubmit="HandleLogin" FormName="loginForm">
+    <DataAnnotationsValidator />
+    <div class="form-group">
+        <label>Tên đăng nhập:</label>
+        <InputText @bind-Value="username" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Mật khẩu:</label>
+        <InputText type="password" @bind-Value="password" class="form-control" />
+    </div>
+    <button class="btn btn-primary" type="submit" disabled="@isLoading">
+        @if (isLoading)
+        {
+            <span class="spinner-border spinner-border-sm"></span>
+            <span> Đang đăng nhập...</span>
+        }
+        else
+        {
+            <span>Đăng nhập</span>
+        }
+    </button>
+</EditForm>
+
+@code {
+    private string username = "";
+    private string password = "";
+    private string errorMessage = "";
+    private bool isLoading = false;
+
+    private async Task HandleLogin()
+    {
+        isLoading = true;
+        errorMessage = "";
+
+        var (success, token, error) = await AuthService.Login(username, password);
+
+        if (success)
+        {
+            Console.WriteLine($"Token: {token}");
+            // _navigationManager.NavigateTo("/dashboard");
+        }
+        else
+        {
+            errorMessage = error;
+        }
+
+        isLoading = false;
+    }
+}

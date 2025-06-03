@@ -15,7 +15,7 @@ namespace backend_blazor.Extensions
             app.Urls.Add("http://0.0.0.0:5163");
 
             app.UseCors("AllowFlutter"); // Bật CORS
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             
             //  Kiểm tra token trước khi xác thực
             app.UseMiddleware<JwtBlacklistMiddleware>();
@@ -24,7 +24,7 @@ namespace backend_blazor.Extensions
             app.UseAuthentication();
             app.UseAuthorization();
             
-            app.UseStaticFiles();  // Cho phép phục vụ file tĩnh
+            //app.UseStaticFiles();  // Cho phép phục vụ file tĩnh
 
             app.UseIpRateLimiting();
             

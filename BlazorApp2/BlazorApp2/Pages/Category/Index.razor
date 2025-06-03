@@ -1,0 +1,72 @@
+@page "/categories"
+@using System.Text.Json
+@using BlazorApp2.Services
+@inject CategoryService CategoryService
+@inject NavigationManager NavigationManager
+
+<h3>Categories</h3>
+
+<button class="btn btn-primary mb-3" @onclick="NavigateToCreate">Tạo mới</button>
+
+@if (_categories.ValueKind == JsonValueKind.Undefined)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var category in _categories.EnumerateArray())
+            {
+                var id = category.GetProperty("id").GetInt32();
+                <tr>
+                    <td>@category.GetProperty("name").GetString()</td>
+                    <td>@category.GetProperty("description").GetString()</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning me-1" @onclick="() => NavigateToEdit(id)">Sửa</button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteCategory(id)">Xoá</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private JsonElement _categories;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _categories = await CategoryService.GetAllCategoriesAsync();
+    }
+
+    private void NavigateToCreate()
+    {
+        NavigationManager.NavigateTo("/categories/create");
+    }
+
+    private void NavigateToEdit(int id)
+    {
+        NavigationManager.NavigateTo($"/categories/edit/{id}");
+    }
+
+    private async Task DeleteCategory(int id)
+    {
+        var confirm = await JS.InvokeAsync<bool>("confirm", $"Bạn có chắc chắn muốn xoá danh mục {id}?");
+        if (confirm)
+        {
+            await CategoryService.DeleteCategoryAsync(id);
+            _categories = await CategoryService.GetAllCategoriesAsync(); // Load lại danh sách
+        }
+    }
+
+    [Inject]
+    private IJSRuntime JS { get; set; } = default!;
+}

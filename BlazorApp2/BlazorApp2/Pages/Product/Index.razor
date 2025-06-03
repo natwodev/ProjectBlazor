@@ -1,0 +1,45 @@
+@page "/products"
+@using System.Text.Json
+@using BlazorApp2.Services
+
+@inject ProductService ProductService
+
+<h3>Products</h3>
+
+@if (_products.ValueKind == JsonValueKind.Undefined)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Description</th>
+            <th>Category</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var product in _products.EnumerateArray())
+        {
+            <tr>
+                <td>@product.GetProperty("name").GetString()</td>
+                <td>@product.GetProperty("price").GetDecimal()</td>
+                <td>@product.GetProperty("description").GetString()</td>
+                <td>@product.GetProperty("categoryName").GetString()</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    private JsonElement _products;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _products = await ProductService.GetAllProductsAsync();
+    }
+}
