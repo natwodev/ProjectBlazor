@@ -1,5 +1,6 @@
 ﻿@using BlazorApp2.Services
 @inherits LayoutComponentBase
+@implements IDisposable
 @inject AuthService AuthService
 @inject NavigationManager NavigationManager
 
@@ -34,9 +35,21 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // Đăng ký lắng nghe sự kiện khi component được khởi tạo
+        AuthService.OnAuthStateChanged += AuthService_OnAuthStateChanged;
+        // Kiểm tra trạng thái ban đầu
         await CheckAuthenticationState();
     }
 
+    // Phương thức này sẽ được gọi khi trạng thái xác thực thay đổi
+    // async void được sử dụng cho event handlers để không chặn UI thread
+    private async void AuthService_OnAuthStateChanged()
+    {
+        // Cập nhật trạng thái và role và gọi StateHasChanged
+        await CheckAuthenticationState();
+    }
+
+    // Kiểm tra trạng thái xác thực hiện tại và cập nhật UI
     private async Task CheckAuthenticationState()
     {
         _isAuthenticated = await AuthService.IsAuthenticated();
@@ -48,27 +61,21 @@
         {
             _userRole = null;
         }
-        StateHasChanged(); // Cập nhật UI
+        // Gọi InvokeAsync(StateHasChanged) để đảm bảo cập nhật UI trên luồng UI thread
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task Logout()
     {
+        // Thực hiện đăng xuất thông qua AuthService
         await AuthService.Logout();
-        await CheckAuthenticationState();
-    }
-
-    protected override void OnInitialized()
-    {
-        AuthService.OnAuthStateChanged += AuthStateChanged;
-    }
-
-    private void AuthStateChanged()
-    {
-        InvokeAsync(StateHasChanged);
+        // Sự kiện OnAuthStateChanged sẽ được AuthService kích hoạt sau khi đăng xuất,
+        // và AuthService_OnAuthStateChanged sẽ xử lý việc cập nhật UI.
     }
 
     public void Dispose()
     {
-        AuthService.OnAuthStateChanged -= AuthStateChanged;
+        // Hủy đăng ký lắng nghe sự kiện khi component bị hủy để tránh rò rò rỉ bộ nhớ
+        AuthService.OnAuthStateChanged -= AuthService_OnAuthStateChanged;
     }
 }
