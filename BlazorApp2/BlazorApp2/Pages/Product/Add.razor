@@ -22,6 +22,12 @@
 </div>
 <div class="mb-3">
     <label for="image" class="form-label">Ảnh sản phẩm</label>
+    @if (!string.IsNullOrEmpty(product.ImageBase64))
+    {
+        <div class="mb-3">
+            <img src="data:image/jpeg;base64,@product.ImageBase64" alt="Ảnh sản phẩm" style="height: 200px; object-fit: cover;" />
+        </div>
+    }
     <InputFile OnChange="OnInputFileChange" />
 </div>
 
