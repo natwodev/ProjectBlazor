@@ -1,7 +1,7 @@
 using System.Net.Http.Json;
-using System.Text;
 using BlazorApp1.DTOs;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Mvc;
 
 namespace BlazorApp1.Services;
 
@@ -16,36 +16,38 @@ public class AuthService
         _navigationManager = navigationManager;
     }
 
-    public async Task<AuthResultDTO> Login(LoginModelDTO loginModel)
+    public async Task<AuthResultDTO> Login([FromBody] LoginModelDTO loginModel)
     {
         try
         {
+
             var response = await _httpClient.PostAsJsonAsync("api/auth/login", loginModel);
 
             if (response.IsSuccessStatusCode)
             {
-                var result = await response.Content.ReadFromJsonAsync<AuthResultDTO>();
-                if (result != null && result.IsSuccess)
+                var token = await response.Content.ReadAsStringAsync();
+
+                return new AuthResultDTO
                 {
-                    // Store the token in localStorage
-                    await _httpClient.PostAsJsonAsync("api/auth/store-token", new { token = result.Token });
-                    return result;
-                }
+                    IsSuccess = true,
+                    Token = token,
+                    Role = "", 
+                };
             }
-            
+
             var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
-            return new AuthResultDTO 
-            { 
-                IsSuccess = false, 
-                ErrorMessage = error?.Message ?? "Đăng nhập thất bại" 
+            return new AuthResultDTO
+            {
+                IsSuccess = false,
+                ErrorMessage = error?.Message ?? "Đăng nhập thất bại"
             };
         }
         catch (Exception ex)
         {
-            return new AuthResultDTO 
-            { 
-                IsSuccess = false, 
-                ErrorMessage = "Có lỗi xảy ra khi đăng nhập" 
+            return new AuthResultDTO
+            {
+                IsSuccess = false,
+                ErrorMessage = $"Có lỗi xảy ra khi đăng nhập: {ex.Message}"
             };
         }
     }
@@ -54,4 +56,4 @@ public class AuthService
 public class ErrorResponse
 {
     public string Message { get; set; }
-} 
+}
