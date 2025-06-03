@@ -20,6 +20,10 @@
     <label for="description" class="form-label">Ghi chú</label>
     <textarea id="description" class="form-control" @bind="product.Description"></textarea>
 </div>
+<div class="mb-3">
+    <label for="image" class="form-label">Ảnh sản phẩm</label>
+    <InputFile OnChange="OnInputFileChange" />
+</div>
 
 <div class="mb-3">
     <label for="category" class="form-label">Danh mục</label>
@@ -50,7 +54,18 @@
     {
         _categories = await CategoryService.GetAllCategorysAsync();
     }
+    
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        using var stream = file.OpenReadStream();
+        var buffer = new byte[file.Size];
+        await stream.ReadAsync(buffer);
 
+        string base64String = Convert.ToBase64String(buffer);
+        string imageBase64 = $"data:{file.ContentType};base64,{base64String}";
+        product.ImageBase64 = base64String;
+    }
     private async Task SaveCategory()
     {
         if (string.IsNullOrWhiteSpace(product.Name))

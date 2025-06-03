@@ -18,6 +18,9 @@ else
             <h6 class="card-subtitle mb-2 text-muted">@_product.CategoryName</h6>
             <p class="card-text"><strong>Giá:</strong> @_product.Price.ToString("C")</p>
             <p class="card-text"><strong>Mô tả:</strong> @_product.Description</p>
+            <td>
+                <img src="data:image/png;base64,@_product.Image" alt="Product Image" style="max-height: 100px;" />
+            </td>
         </div>
     </div>
     <button class="btn btn-secondary mt-3" @onclick="NavigateBack">Quay lại</button>

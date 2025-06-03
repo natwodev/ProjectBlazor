@@ -30,7 +30,18 @@ else
             <label for="description" class="form-label">Ghi chú</label>
             <InputTextArea id="description" class="form-control" @bind-Value="product.Description" />
         </div>
-
+        
+        <div class="mb-3">
+            <label for="image" class="form-label">Ảnh sản phẩm</label>
+            @if (!string.IsNullOrEmpty(product.ImageBase64))
+            {
+                <div class="mb-3">
+                    <label class="form-label">Ảnh hiện tại</label><br />
+                    <img src="data:image/jpeg;base64,@product.ImageBase64" alt="Ảnh sản phẩm" style="max-width: 200px;" />
+                </div>
+            }
+            <InputFile OnChange="OnInputFileChange" />
+        </div>
         <div class="mb-3">
             <label for="category" class="form-label">Danh mục</label>
             <select id="category" class="form-select" @bind="product.CategoryId">
@@ -52,7 +63,22 @@ else
 
     private UpdateProductDto? product;
     private List<CategoryDto>? _categories;
+    private string? _imageBase64;
 
+    
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        using var stream = file.OpenReadStream();
+        var buffer = new byte[file.Size];
+        await stream.ReadAsync(buffer);
+
+        string base64String = Convert.ToBase64String(buffer);
+        string imageBase64 = $"data:{file.ContentType};base64,{base64String}";
+        _imageBase64 = base64String;
+        product.ImageBase64 = base64String;
+    } 
+    
     protected override async Task OnInitializedAsync()
     {
         // Load danh mục trước để có data dropdown
@@ -66,7 +92,8 @@ else
                 Name = existingProduct.Name,
                 Description = existingProduct.Description,
                 Price = existingProduct.Price,
-                CategoryId = existingProduct.CategoryId
+                CategoryId = existingProduct.CategoryId,
+                ImageBase64 = existingProduct.Image
             };
         }
         else
@@ -91,6 +118,7 @@ else
                 return;
             }
 
+            product.ImageBase64 = _imageBase64;
             var response = await ProductService.UpdateProductAsync(id, product);
             if (response.IsSuccessStatusCode)
             {

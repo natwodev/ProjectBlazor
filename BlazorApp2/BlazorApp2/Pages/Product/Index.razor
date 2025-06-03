@@ -39,6 +39,9 @@ else
                 <td>@product.Description</td>
                 <td>@product.CategoryName</td>
                 <td>
+                    <img src="data:image/png;base64,@product.Image" alt="Product Image" style="max-height: 100px;" />
+                </td>
+                <td>
                     <button class="btn btn-sm btn-primary me-1" @onclick="() => NavigateToView(product.Id)">Chi tiết</button>
                     <button class="btn btn-sm btn-warning me-1" @onclick="() => NavigateToEdit(product.Id)">Sửa</button>
                     <button class="btn btn-sm btn-danger" @onclick="() => DeleteProduct(product.Id)">Xoá</button>
