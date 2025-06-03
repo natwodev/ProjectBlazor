@@ -1,0 +1,41 @@
+@page "/products/view/{id:int}"
+@using BlazorApp2.DTOs
+@using BlazorApp2.Services
+@inject ProductService ProductService
+@inject NavigationManager NavigationManager
+
+<h3>Chi tiết sản phẩm</h3>
+
+@if (_product == null)
+{
+    <p><em>Đang tải dữ liệu...</em></p>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">@_product.Name</h5>
+            <h6 class="card-subtitle mb-2 text-muted">@_product.CategoryName</h6>
+            <p class="card-text"><strong>Giá:</strong> @_product.Price.ToString("C")</p>
+            <p class="card-text"><strong>Mô tả:</strong> @_product.Description</p>
+        </div>
+    </div>
+    <button class="btn btn-secondary mt-3" @onclick="NavigateBack">Quay lại</button>
+}
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    private ProductDto? _product;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _product = await ProductService.GetProductByIdAsync(id);
+    }
+
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo("/products");
+    }
+}

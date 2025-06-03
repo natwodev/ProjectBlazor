@@ -1,7 +1,9 @@
 @page "/categories/create"
+@using BlazorApp2.DTOs
 @using BlazorApp2.Services
 @inject CategoryService CategoryService
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JS
 
 <h3>Thêm danh mục</h3>
 
@@ -18,11 +20,24 @@
 <button class="btn btn-success" @onclick="SaveCategory">Lưu</button>
 
 @code {
-    private CategoryDto category = new();
+    private CreateCategoryDto category = new();
 
     private async Task SaveCategory()
     {
-        await CategoryService.CreateCategoryAsync(category);
-        NavigationManager.NavigateTo("/categories");
+        if (string.IsNullOrWhiteSpace(category.Name))
+        {
+            await JS.InvokeVoidAsync("alert", "Tên danh mục là bắt buộc.");
+            return;
+        }
+
+        var response = await CategoryService.CreateCategoryAsync(category);
+        if (response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/categories");
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("alert", "Không thể tạo danh mục.");
+        }
     }
 }

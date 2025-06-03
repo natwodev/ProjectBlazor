@@ -1,4 +1,7 @@
-﻿@inherits LayoutComponentBase
+﻿@using BlazorApp2.Services
+@inherits LayoutComponentBase
+@inject AuthService AuthService
+@inject NavigationManager NavigationManager
 
 <div class="page">
     <div class="sidebar">
@@ -8,7 +11,15 @@
     <main>
         <div class="top-row px-4">
             <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-            <NavLink href="/login">Login</NavLink>
+            @if (_isAuthenticated)
+            {
+                <span>Xin chào, @(_userRole ?? "Người dùng")!</span>
+                <button class="ml-auto btn btn-link" @onclick="Logout">Đăng xuất</button>
+            }
+            else
+            {
+                <NavLink href="/login">Login</NavLink>
+            }
         </div>
 
         <article class="content px-4">
@@ -16,3 +27,48 @@
         </article>
     </main>
 </div>
+
+@code {
+    private bool _isAuthenticated = false;
+    private string? _userRole;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CheckAuthenticationState();
+    }
+
+    private async Task CheckAuthenticationState()
+    {
+        _isAuthenticated = await AuthService.IsAuthenticated();
+        if (_isAuthenticated)
+        {
+            _userRole = await AuthService.GetUserRoleFromToken();
+        }
+        else
+        {
+            _userRole = null;
+        }
+        StateHasChanged(); // Cập nhật UI
+    }
+
+    private async Task Logout()
+    {
+        await AuthService.Logout();
+        await CheckAuthenticationState();
+    }
+
+    protected override void OnInitialized()
+    {
+        AuthService.OnAuthStateChanged += AuthStateChanged;
+    }
+
+    private void AuthStateChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        AuthService.OnAuthStateChanged -= AuthStateChanged;
+    }
+}

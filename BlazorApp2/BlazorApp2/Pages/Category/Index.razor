@@ -1,16 +1,21 @@
 @page "/categories"
-@using System.Text.Json
+@using BlazorApp2.DTOs
 @using BlazorApp2.Services
 @inject CategoryService CategoryService
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JS
 
 <h3>Categories</h3>
 
 <button class="btn btn-primary mb-3" @onclick="NavigateToCreate">Tạo mới</button>
 
-@if (_categories.ValueKind == JsonValueKind.Undefined)
+@if (_categories == null)
 {
     <p><em>Loading...</em></p>
+}
+else if (_categories.Count == 0)
+{
+    <p><em>Không có danh mục nào.</em></p>
 }
 else
 {
@@ -23,15 +28,15 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var category in _categories.EnumerateArray())
+            @foreach (var category in _categories)
             {
-                var id = category.GetProperty("id").GetInt32();
                 <tr>
-                    <td>@category.GetProperty("name").GetString()</td>
-                    <td>@category.GetProperty("description").GetString()</td>
+                    <td>@category.Name</td>
+                    <td>@category.Description</td>
                     <td>
-                        <button class="btn btn-sm btn-warning me-1" @onclick="() => NavigateToEdit(id)">Sửa</button>
-                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteCategory(id)">Xoá</button>
+                        <button class="btn btn-sm btn-primary me-1" @onclick="() => NavigateToView(category.Id)">Chi tiết</button>
+                        <button class="btn btn-sm btn-warning me-1" @onclick="() => NavigateToEdit(category.Id)">Sửa</button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteCategory(category.Id)">Xoá</button>
                     </td>
                 </tr>
             }
@@ -40,11 +45,16 @@ else
 }
 
 @code {
-    private JsonElement _categories;
+    private List<CategoryDto>? _categories;
 
     protected override async Task OnInitializedAsync()
     {
-        _categories = await CategoryService.GetAllCategoriesAsync();
+        await LoadCategoriesAsync();
+    }
+
+    private async Task LoadCategoriesAsync()
+    {
+        _categories = await CategoryService.GetAllCategorysAsync();
     }
 
     private void NavigateToCreate()
@@ -54,19 +64,28 @@ else
 
     private void NavigateToEdit(int id)
     {
-        NavigationManager.NavigateTo($"/categories/edit/{id}");
+        NavigationManager.NavigateTo($"/categories/update/{id}");
     }
 
+    private void NavigateToView(int id)
+    {
+        NavigationManager.NavigateTo($"/categories/view/{id}");
+    }
+    
     private async Task DeleteCategory(int id)
     {
         var confirm = await JS.InvokeAsync<bool>("confirm", $"Bạn có chắc chắn muốn xoá danh mục {id}?");
         if (confirm)
         {
-            await CategoryService.DeleteCategoryAsync(id);
-            _categories = await CategoryService.GetAllCategoriesAsync(); // Load lại danh sách
+            var response = await CategoryService.DeleteCategoryAsync(id);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadCategoriesAsync(); 
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("alert", "Không thể xoá danh mục.");
+            }
         }
     }
-
-    [Inject]
-    private IJSRuntime JS { get; set; } = default!;
 }

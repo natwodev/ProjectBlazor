@@ -1,7 +1,8 @@
 @page "/login"
-
 @using BlazorApp2.Services
+@using BlazorApp2.DTOs
 @inject AuthService AuthService
+@inject NavigationManager NavigationManager
 
 <h3>Đăng nhập</h3>
 
@@ -10,15 +11,15 @@
     <div class="alert alert-danger">@errorMessage</div>
 }
 
-<EditForm Model="this" OnValidSubmit="HandleLogin" FormName="loginForm">
+<EditForm Model="loginModel" OnValidSubmit="HandleLogin" FormName="loginForm">
     <DataAnnotationsValidator />
     <div class="form-group">
         <label>Tên đăng nhập:</label>
-        <InputText @bind-Value="username" class="form-control" />
+        <InputText @bind-Value="loginModel.UserName" class="form-control" />
     </div>
     <div class="form-group">
         <label>Mật khẩu:</label>
-        <InputText type="password" @bind-Value="password" class="form-control" />
+        <InputText type="password" @bind-Value="loginModel.Password" class="form-control" />
     </div>
     <button class="btn btn-primary" type="submit" disabled="@isLoading">
         @if (isLoading)
@@ -34,26 +35,33 @@
 </EditForm>
 
 @code {
-    private string username = "";
-    private string password = "";
+    private LoginModelDto loginModel = new();
     private string errorMessage = "";
     private bool isLoading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Kiểm tra nếu đã đăng nhập thì chuyển hướng về trang chủ
+        if (await AuthService.IsAuthenticated())
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
 
     private async Task HandleLogin()
     {
         isLoading = true;
         errorMessage = "";
 
-        var (success, token, error) = await AuthService.Login(username, password);
+        var result = await AuthService.Login(loginModel.UserName, loginModel.Password);
 
-        if (success)
+        if (result.IsSuccess)
         {
-            Console.WriteLine($"Token: {token}");
-            // _navigationManager.NavigateTo("/dashboard");
+            NavigationManager.NavigateTo("/products");
         }
         else
         {
-            errorMessage = error;
+            errorMessage = result.ErrorMessage;
         }
 
         isLoading = false;

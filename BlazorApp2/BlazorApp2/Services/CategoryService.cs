@@ -1,56 +1,49 @@
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using BlazorApp2.DTOs;
 
-namespace BlazorApp2.Services;
-
-public class CategoryService
+namespace BlazorApp2.Services
 {
-    private readonly HttpClient _http;
-
-    public CategoryService(HttpClient http)
+    public class CategoryService
     {
-        _http = http;
-    }
+        private readonly HttpClient _http;
 
-    public async Task<JsonElement> GetAllCategoriesAsync()
-    {
-        var stream = await _http.GetStreamAsync("api/category");
-        var doc = await JsonDocument.ParseAsync(stream);
-        return doc.RootElement;
-    }
-
-    public async Task CreateCategoryAsync(CategoryDto category)
-    {
-        var response = await _http.PostAsJsonAsync("api/category", category);
-        response.EnsureSuccessStatusCode();
-    }
-
-    public async Task PatchCategoryAsync(int id, Dictionary<string, object> patchData)
-    {
-        var json = JsonSerializer.Serialize(patchData);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        var request = new HttpRequestMessage(new HttpMethod("PATCH"), $"api/category/{id}")
+        public CategoryService(HttpClient http)
         {
-            Content = content
-        };
+            _http = http;
+        }
+        
+        public async Task<List<CategoryDto>> GetAllCategorysAsync()
+        {
+            var categorys = await _http.GetFromJsonAsync<List<CategoryDto>>("api/category");
+            return categorys ?? new List<CategoryDto>();
+        }
+        
+        public async Task<CategoryDto?> GetCategoryByIdAsync(int id)
+        {
+            var category = await _http.GetFromJsonAsync<CategoryDto>($"api/category/{id}");
+            return category;
+        }
 
-        var response = await _http.SendAsync(request);
-        response.EnsureSuccessStatusCode();
-    }
-    public async Task DeleteCategoryAsync(int id)
-    {
-        var response = await _http.DeleteAsync($"api/category/{id}");
-        response.EnsureSuccessStatusCode();
-    }
+        public async Task<HttpResponseMessage> CreateCategoryAsync(CreateCategoryDto newCategory)
+        {
+            return await _http.PostAsJsonAsync("api/category", newCategory);
+        }
 
+        public async Task<HttpResponseMessage> UpdateCategoryAsync(int id, UpdateCategoryDto updatedCategory)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Patch, $"api/category/{id}")
+            {
+                Content = JsonContent.Create(updatedCategory)
+            };
+
+            return await _http.SendAsync(request);
+        }
+        
+        public async Task<HttpResponseMessage> DeleteCategoryAsync(int id)
+        {
+            return await _http.DeleteAsync($"api/category/{id}");
+        }
+    }
 }
-
-public class CategoryDto
-{
-    public string? Name { get; set; }
-    public string? Description { get; set; }
-} 
-
-

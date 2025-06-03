@@ -1,14 +1,23 @@
 @page "/products"
-@using System.Text.Json
+@using BlazorApp2.DTOs
 @using BlazorApp2.Services
+@inject NavigationManager NavigationManager
 
 @inject ProductService ProductService
+@inject IJSRuntime JS
 
 <h3>Products</h3>
 
-@if (_products.ValueKind == JsonValueKind.Undefined)
+<button class="btn btn-primary mb-3" @onclick="NavigateToCreate">Tạo mới</button>
+
+
+@if (_products == null)
 {
     <p><em>Loading...</em></p>
+}
+else if (_products.Count == 0)
+{
+    <p><em>No products found.</em></p>
 }
 else
 {
@@ -22,13 +31,18 @@ else
         </tr>
         </thead>
         <tbody>
-        @foreach (var product in _products.EnumerateArray())
+        @foreach (var product in _products)
         {
             <tr>
-                <td>@product.GetProperty("name").GetString()</td>
-                <td>@product.GetProperty("price").GetDecimal()</td>
-                <td>@product.GetProperty("description").GetString()</td>
-                <td>@product.GetProperty("categoryName").GetString()</td>
+                <td>@product.Name</td>
+                <td>@product.Price.ToString("C")</td>
+                <td>@product.Description</td>
+                <td>@product.CategoryName</td>
+                <td>
+                    <button class="btn btn-sm btn-primary me-1" @onclick="() => NavigateToView(product.Id)">Chi tiết</button>
+                    <button class="btn btn-sm btn-warning me-1" @onclick="() => NavigateToEdit(product.Id)">Sửa</button>
+                    <button class="btn btn-sm btn-danger" @onclick="() => DeleteProduct(product.Id)">Xoá</button>
+                </td>
             </tr>
         }
         </tbody>
@@ -36,10 +50,47 @@ else
 }
 
 @code {
-    private JsonElement _products;
+    private List<ProductDto>? _products;
 
     protected override async Task OnInitializedAsync()
     {
         _products = await ProductService.GetAllProductsAsync();
+    }
+    
+    private void NavigateToEdit(int id)
+    {
+        NavigationManager.NavigateTo($"/products/update/{id}");
+    }
+    
+    private void NavigateToCreate()
+    {
+        NavigationManager.NavigateTo("/products/create");
+    }
+    
+    private void NavigateToView(int id)
+    {
+        NavigationManager.NavigateTo($"/products/view/{id}");
+    }
+    
+    private async Task LoadProductAsync()
+    {
+        _products = await ProductService.GetAllProductsAsync();
+    }
+    
+    private async Task DeleteProduct(int id)
+    {
+        var confirm = await JS.InvokeAsync<bool>("confirm", $"Bạn có chắc chắn muốn xoá sản phẩm {id}?");
+        if (confirm)
+        {
+            var response = await ProductService.DeleteProductAsync(id);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadProductAsync(); 
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("alert", "Không thể xoá Sản phẩm.");
+            }
+        }
     }
 }

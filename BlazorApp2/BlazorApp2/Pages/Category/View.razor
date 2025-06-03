@@ -1,0 +1,56 @@
+@page "/categories/view/{id:int}"
+@using BlazorApp2.DTOs
+@using BlazorApp2.Services
+@inject CategoryService CategoryService
+@inject NavigationManager NavigationManager
+
+<h3>Chi tiết danh mục</h3>
+
+<button class="btn btn-primary mb-3" @onclick="NavigateToList">Quay lại danh sách</button>
+
+@if (category != null)
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Tên</th>
+            <th>Mô tả</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>@category.Name</td>
+            <td>@category.Description</td>
+        </tr>
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Đang tải dữ liệu...</p>
+}
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    private CategoryDto? category;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var existingCategory = await CategoryService.GetCategoryByIdAsync(id);
+        if (existingCategory != null)
+        {
+            category = new CategoryDto
+            {
+                Name = existingCategory.Name,
+                Description = existingCategory.Description
+            };
+        }
+    }
+
+    private void NavigateToList()
+    {
+        NavigationManager.NavigateTo("/categories");
+    }
+}

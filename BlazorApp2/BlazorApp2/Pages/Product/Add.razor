@@ -1,0 +1,78 @@
+@page "/products/create"
+@using BlazorApp2.DTOs
+@using BlazorApp2.Services
+@inject ProductService ProductService
+@inject CategoryService CategoryService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+
+<h3>Thêm sản phẩm</h3>
+
+<div class="mb-3">
+    <label for="name" class="form-label">Tên</label>
+    <input id="name" class="form-control" @bind="product.Name" />
+</div>
+<div class="mb-3">
+    <label for="price" class="form-label">Giá</label>
+    <input id="price" type="number" class="form-control" @bind="product.Price" />
+</div>
+<div class="mb-3">
+    <label for="description" class="form-label">Ghi chú</label>
+    <textarea id="description" class="form-control" @bind="product.Description"></textarea>
+</div>
+
+<div class="mb-3">
+    <label for="category" class="form-label">Danh mục</label>
+    <select id="category" class="form-select" @bind="product.CategoryId">
+        <option value="">-- Chọn danh mục --</option>
+        @if (_categories != null)
+        {
+            @foreach (var category in _categories)
+            {
+                <option value="@category.Id">@category.Name</option>
+            }
+        }
+    </select>
+</div>
+
+<button class="btn btn-success" @onclick="SaveCategory">Lưu</button>
+
+@code {
+    private CreateProductDto product = new();
+    private List<CategoryDto>? _categories;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCategoriesAsync();
+    }
+
+    private async Task LoadCategoriesAsync()
+    {
+        _categories = await CategoryService.GetAllCategorysAsync();
+    }
+
+    private async Task SaveCategory()
+    {
+        if (string.IsNullOrWhiteSpace(product.Name))
+        {
+            await JS.InvokeVoidAsync("alert", "Tên sản phẩm là bắt buộc.");
+            return;
+        }
+
+        if (product.CategoryId == null || product.CategoryId == 0)
+        {
+            await JS.InvokeVoidAsync("alert", "Vui lòng chọn danh mục.");
+            return;
+        }
+
+        var response = await ProductService.CreateProductAsync(product);
+        if (response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/products");
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("alert", "Không thể tạo sản phẩm.");
+        }
+    }
+}

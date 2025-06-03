@@ -1,0 +1,105 @@
+@page "/products/update/{id:int}"
+@using BlazorApp2.DTOs
+@using BlazorApp2.Services
+@inject ProductService ProductService
+@inject CategoryService CategoryService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+
+<h3>Chỉnh sửa sản phẩm</h3>
+
+@if (product == null || _categories == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm Model="product" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label for="name" class="form-label">Tên</label>
+            <InputText id="name" class="form-control" @bind-Value="product.Name" />
+        </div>
+        <div class="mb-3">
+            <label for="price" class="form-label">Giá</label>
+            <InputNumber id="price" class="form-control" @bind-Value="product.Price" />
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Ghi chú</label>
+            <InputTextArea id="description" class="form-control" @bind-Value="product.Description" />
+        </div>
+
+        <div class="mb-3">
+            <label for="category" class="form-label">Danh mục</label>
+            <select id="category" class="form-select" @bind="product.CategoryId">
+                <option value="">-- Chọn danh mục --</option>
+                @foreach (var category in _categories)
+                {
+                    <option value="@category.Id">@category.Name</option>
+                }
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Cập nhật</button>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    private UpdateProductDto? product;
+    private List<CategoryDto>? _categories;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Load danh mục trước để có data dropdown
+        _categories = await CategoryService.GetAllCategorysAsync();
+
+        var existingProduct = await ProductService.GetProductByIdAsync(id);
+        if (existingProduct != null)
+        {
+            product = new UpdateProductDto
+            {
+                Name = existingProduct.Name,
+                Description = existingProduct.Description,
+                Price = existingProduct.Price,
+                CategoryId = existingProduct.CategoryId
+            };
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/products");
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (product != null)
+        {
+            if (string.IsNullOrWhiteSpace(product.Name))
+            {
+                await JS.InvokeVoidAsync("alert", "Tên sản phẩm là bắt buộc.");
+                return;
+            }
+
+            if (product.CategoryId == null || product.CategoryId == 0)
+            {
+                await JS.InvokeVoidAsync("alert", "Vui lòng chọn danh mục.");
+                return;
+            }
+
+            var response = await ProductService.UpdateProductAsync(id, product);
+            if (response.IsSuccessStatusCode)
+            {
+                NavigationManager.NavigateTo("/products");
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("alert", "Cập nhật sản phẩm thất bại.");
+            }
+        }
+    }
+}
