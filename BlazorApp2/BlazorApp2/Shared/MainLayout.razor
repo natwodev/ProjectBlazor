@@ -12,9 +12,17 @@
 
     <main>
         <div class="top-row px-4">
+            @if (_isAdmin)
+            {
+                <NavLink class="btn btn-link position-relative me-3" href="/AllOrders">
+                    Tất cả đơn đặt hàng
+
+                </NavLink>
+            }
+            
             <NavLink class="btn btn-link position-relative me-3" href="/MyOrder">
-               Danh sách đơn đặt hàng
-               
+                Danh sách đơn đặt hàng
+
             </NavLink>
             <NavLink class="btn btn-link position-relative me-3" href="/cart">
                 🛒 Giỏ hàng
@@ -40,7 +48,8 @@
 @code {
     private bool _isAuthenticated = false;
     private string? _userRole;
-    
+    private bool _isAdmin;
+
     protected override async Task OnInitializedAsync()
     {
         // Đăng ký lắng nghe sự kiện khi component được khởi tạo
@@ -60,6 +69,8 @@
     // Kiểm tra trạng thái xác thực hiện tại và cập nhật UI
     private async Task CheckAuthenticationState()
     {
+        _isAdmin = await AuthService.IsAdmin();
+
         _isAuthenticated = await AuthService.IsAuthenticated();
         if (_isAuthenticated)
         {

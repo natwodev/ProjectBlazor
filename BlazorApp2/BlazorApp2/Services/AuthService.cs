@@ -46,7 +46,6 @@ public class AuthService
                         var token = tokenElement.GetString();
                         if (!string.IsNullOrEmpty(token))
                         {
-                            // Lưu token vào localStorage
                             await _jsRuntime.InvokeVoidAsync("localStorage.setItem", TokenKey, token);
                             OnAuthStateChanged?.Invoke();
                             return new AuthResultDto { IsSuccess = true, Token = token };
@@ -79,12 +78,22 @@ public class AuthService
 
     public async Task Logout()
     {
-        // Xóa token khỏi localStorage
-        await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", TokenKey);
-        OnAuthStateChanged?.Invoke();
-        // Chuyển hướng về trang login
-        _navigationManager.NavigateTo("/login");
+        var response = await _httpClient.PostAsync("api/auth/logout", null);
+
+        if (response.IsSuccessStatusCode)
+        {
+            await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", TokenKey);
+
+            OnAuthStateChanged?.Invoke();
+
+            _navigationManager.NavigateTo("/login");
+        }
+        else
+        {
+            Console.WriteLine("Logout failed: " + response.ReasonPhrase);
+        }
     }
+
 
     public async Task<bool> IsAuthenticated()
     {

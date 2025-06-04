@@ -70,5 +70,10 @@ namespace BlazorApp2.Services
             return await _httpClient.GetFromJsonAsync<IEnumerable<OrderDto>>("api/order/my-orders") 
                    ?? new List<OrderDto>();
         }
+        public async Task<IEnumerable<OrderDto>> GetAllOrders()
+        {
+            return await _httpClient.GetFromJsonAsync<IEnumerable<OrderDto>>("api/order/all-orders") 
+                   ?? new List<OrderDto>();
+        }
     }
 }

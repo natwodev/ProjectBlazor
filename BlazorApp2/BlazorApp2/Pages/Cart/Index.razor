@@ -3,13 +3,19 @@
 @using BlazorApp2.Services
 @inject CartItemService CartItemService
 @inject NavigationManager NavigationManager
+@inject AuthService AuthService
 @inject IJSRuntime JS
 
 <h3>Your Cart</h3>
 <button class="btn btn-primary create-btn" @onclick="NavigateToList">
     <i class="fas fa-plus me-2"></i>Quay lại danh sách 
 </button>
-@if (cartItems == null)
+@if (!_isAuthenticated)
+{
+    <div class="alert alert-warning">
+        Please <a href="/login">login</a> to view your cart.
+    </div>
+}else if (cartItems == null)
 {
     <p>Loading...</p>
 }
@@ -82,9 +88,11 @@ else
 
 @code {
     private List<CartItemDto>? cartItems;
+    private bool _isAuthenticated;
 
     protected override async Task OnInitializedAsync()
-    {
+    {       
+        _isAuthenticated = await AuthService.IsAuthenticated();
         await LoadCart();
     }
 

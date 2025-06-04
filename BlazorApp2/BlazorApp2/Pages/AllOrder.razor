@@ -1,6 +1,80 @@
-@page "/AllOrder"
-<h3>AllOrder</h3>
+@page "/AllOrders"
+@using backend_blazor.DTOs
+@using BlazorApp2.DTOs
+@using BlazorApp2.Services
+@inject CartItemService CartItemService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+@inject AuthService AuthService
+
+<div class="container py-4">
+    <h3>My Orders</h3>
+
+    @if (!_isAuthenticated)
+    {
+        <div class="alert alert-warning">
+            Please <a href="/login">login</a> to view your orders.
+        </div>
+    }
+    else if (orders == null)
+    {
+        <p>Loading...</p>
+    }
+    else if (!orders.Any())
+    {
+        <div class="alert alert-info">
+            You have no orders. <a href="/products">Continue shopping</a>
+        </div>
+    }
+    else
+    {
+        foreach (var order in orders)
+        {
+            <div class="card mb-4">
+                <div class="card-header">
+                    <strong>Order ID:</strong> @order.Id |
+                    <strong>Date:</strong> @order.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                </div>
+                <div class="card-body">
+                    <p><strong>Name:</strong> @order.Name</p>
+                    <p><strong>Phone:</strong> @order.Phone</p>
+                    <p><strong>Address:</strong> @order.Address</p>
+
+                    <h5>Items:</h5>
+                    <ul class="list-group">
+                        @foreach (var item in order.OrderDetails)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>@item.Name</strong> - @item.CategoryName <br />
+                                    @item.Description
+                                </div>
+                                <span class="badge bg-primary rounded-pill">
+                                    @item.Price.ToString("N0") ₫
+                                </span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        }
+    }
+</div>
+
 
 @code {
-    
+    private List<OrderDto>? orders;
+    private bool isProcessing;
+    private bool _isAuthenticated;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isAuthenticated = await AuthService.IsAuthenticated();
+
+        if (_isAuthenticated)
+        {
+            var userOrders = await CartItemService.GetAllOrders();
+            orders = userOrders?.ToList();
+        }
+    }
 }

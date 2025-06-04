@@ -74,7 +74,7 @@ namespace backend_blazor.Authentication.Services
                   Token = tokenString
               };
           }
-
+          
           public async Task LogoutAsync(string token)
           {
               var jwtToken = new JwtSecurityTokenHandler().ReadToken(token) as JwtSecurityToken;

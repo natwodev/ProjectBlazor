@@ -15,7 +15,6 @@ public class AuthHeaderHandler : DelegatingHandler
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        // Không thêm token cho request login
         if (!request.RequestUri?.AbsolutePath.Contains("api/auth/login", StringComparison.OrdinalIgnoreCase) ?? false)
         {
             var token = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", TokenKey);
