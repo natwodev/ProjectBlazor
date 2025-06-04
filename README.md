@@ -7,7 +7,7 @@ redis : blacklist token (logout)
 chạy lại migration  
 update database 
 run back-end --> run front-end 
-role admin : username : admin
-             password : admin
-role custumers : username : customer@example.com
-                 password : Customer@123
+role admin : username : "admin"
+             password : "admin"
+role custumers : username : "customer@example.com"
+                 password : "Customer@123"
