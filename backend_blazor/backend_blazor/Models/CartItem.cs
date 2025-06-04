@@ -22,6 +22,11 @@ public class CartItem
     [Required]
     [Column(TypeName = "decimal(18,2)")]
     public decimal Price { get; set; }
+    
+    [MaxLength(450)]
+    [ForeignKey("ApplicationUser")]
+    public string? UserId { get; set; }
+    public ApplicationUser? ApplicationUser { get; set; }
 
 }
 

@@ -18,6 +18,16 @@ public class CartItemRepository : ICartItemRepository
         _mapper = mapper;
     }
 
+    public async Task<IEnumerable<CartItemDto>> GetCartItemsByUserIdAsync(string userId)
+    {
+        var cartItems = await _context.CartItems
+            .Include(c => c.Product)
+            .Where(c => c.UserId == userId)
+            .ToListAsync();
+
+        return _mapper.Map<IEnumerable<CartItemDto>>(cartItems);
+    }
+
     public async Task<IEnumerable<CartItemDto>> GetAllCartItemsAsync()
     {
         var cartItems = await _context.CartItems
@@ -43,7 +53,7 @@ public class CartItemRepository : ICartItemRepository
             .FirstOrDefaultAsync(c => c.Id == id);
     }
 
-    public async Task<CartItemDto> CreateAsync(CreateCartItemDto dto)
+    public async Task<CartItemDto> CreateAsync(string id,CreateCartItemDto dto)
     {
         var product = await _context.Products.FindAsync(dto.ProductId);
         if (product == null)
@@ -51,6 +61,7 @@ public class CartItemRepository : ICartItemRepository
 
         var cartItem = _mapper.Map<CartItem>(dto);
         cartItem.Price = product.Price;
+        cartItem.UserId = id; 
 
         _context.CartItems.Add(cartItem);
         await _context.SaveChangesAsync();
@@ -92,5 +103,51 @@ public class CartItemRepository : ICartItemRepository
         return await _context.CartItems
             .Include(c => c.Product)
             .FirstOrDefaultAsync(c => c.ProductId == productId);
+    }
+
+    public async Task<CartItem?> GetCartItemByProductAsync(int productId, string userId)
+    {
+        return await _context.CartItems
+            .Include(c => c.Product)
+            .FirstOrDefaultAsync(c => c.ProductId == productId && c.UserId == userId);
+    }
+
+    public async Task<OrderDto> CheckoutAsync(CreateOrderDto orderDto)
+    {
+        // Get all cart items
+        var cartItems = await _context.CartItems
+            .Include(c => c.Product)
+            .ToListAsync();
+
+        if (!cartItems.Any())
+            throw new InvalidOperationException("Cart is empty");
+
+        // Create new order
+        var order = new Order
+        {
+            Name = orderDto.Name,
+            Phone = orderDto.Phone,
+            Address = orderDto.Address,
+            UserId = orderDto.UserId,
+            CreatedAt = DateTime.Now,
+            OrderDetails = cartItems.Select(item => new OrderDetail
+            {
+                ProductId = item.ProductId,
+                Quantity = item.Quantity,
+                Price = item.Price
+            }).ToList()
+        };
+
+        // Add order to database
+        _context.Orders.Add(order);
+        
+        // Clear cart items
+        _context.CartItems.RemoveRange(cartItems);
+        
+        // Save changes
+        await _context.SaveChangesAsync();
+
+        // Return created order
+        return _mapper.Map<OrderDto>(order);
     }
 } 

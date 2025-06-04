@@ -21,15 +21,19 @@ public class CartItemService : ICartItemService
         return await _cartItemRepository.GetAllCartItemsAsync();
     }
 
+    public async Task<IEnumerable<CartItemDto>> GetCartItemsByUserIdAsync(string userId)
+    {
+        return await _cartItemRepository.GetCartItemsByUserIdAsync(userId);
+    }
     public async Task<CartItemDto?> GetCartItemByIdAsync(int id)
     {
         return await _cartItemRepository.GetCartItemDtoByIdAsync(id);
     }
 
-    public async Task<CartItemDto> AddToCartAsync(CreateCartItemDto dto)
+    public async Task<CartItemDto> AddToCartAsync(string id,CreateCartItemDto dto)
     {
         // Kiểm tra xem sản phẩm đã có trong giỏ hàng chưa
-        var existingCartItem = await _cartItemRepository.GetCartItemByProductAsync(dto.ProductId);
+        var existingCartItem = await _cartItemRepository.GetCartItemByProductAsync(dto.ProductId,id);
         
         if (existingCartItem != null)
         {
@@ -41,7 +45,7 @@ public class CartItemService : ICartItemService
         }
 
         // Nếu chưa có, tạo mới
-        return await _cartItemRepository.CreateAsync(dto);
+        return await _cartItemRepository.CreateAsync(id,dto);
     }
 
     public async Task<CartItemDto> UpdateCartItemQuantityAsync(int id, UpdateCartItemDto dto)

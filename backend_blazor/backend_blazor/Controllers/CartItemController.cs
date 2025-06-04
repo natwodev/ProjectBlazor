@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using backend_blazor.DTOs;
 using backend_blazor.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -33,13 +34,27 @@ public class CartItemController : ControllerBase
 
         return Ok(cartItem);
     }
+    
+    [HttpGet("my-cart")]
+    public async Task<ActionResult<IEnumerable<CartItemDto>>> GetCartItemsByUserIdAsync()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized(new { message = "Token không hợp lệ!" });
+        var cartItem = await _cartItemService.GetCartItemsByUserIdAsync(userId);
+        return Ok(cartItem);
+    }
 
     [HttpPost]
     public async Task<ActionResult<CartItemDto>> AddToCart(CreateCartItemDto dto)
     {
         try
         {
-            var cartItem = await _cartItemService.AddToCartAsync(dto);
+            // Get current user's ID from claims
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized(new { message = "Token không hợp lệ!" });
+            var cartItem = await _cartItemService.AddToCartAsync(userId,dto);
             return CreatedAtAction(nameof(GetCartItem), new { id = cartItem.Id }, cartItem);
         }
         catch (ArgumentException ex)

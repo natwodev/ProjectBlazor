@@ -113,7 +113,7 @@
 
     private async Task LoadCart()
     {
-        var items = await CartItemService.GetCartItemsAsync();
+        var items = await CartItemService.GetCartItemsByUserIdAsync();
         cartItems = items.ToList();
     }
 

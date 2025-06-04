@@ -3,6 +3,7 @@
 @implements IDisposable
 @inject AuthService AuthService
 @inject NavigationManager NavigationManager
+@inject NavigationManager Navigation
 
 <div class="page">
     <div class="sidebar">
@@ -11,9 +12,13 @@
 
     <main>
         <div class="top-row px-4">
+            <NavLink class="btn btn-link position-relative me-3" href="/MyOrder">
+               Danh sách đơn đặt hàng
+               
+            </NavLink>
             <NavLink class="btn btn-link position-relative me-3" href="/cart">
                 🛒 Giỏ hàng
-               
+
             </NavLink>
             @if (_isAuthenticated)
             {
@@ -22,7 +27,7 @@
             }
             else
             {
-                <NavLink href="/login">Login</NavLink>
+                <NavLink href="/login">Đăng nhập</NavLink>
             }
         </div>
 
@@ -35,7 +40,7 @@
 @code {
     private bool _isAuthenticated = false;
     private string? _userRole;
-
+    
     protected override async Task OnInitializedAsync()
     {
         // Đăng ký lắng nghe sự kiện khi component được khởi tạo
@@ -74,6 +79,8 @@
         await AuthService.Logout();
         // Sự kiện OnAuthStateChanged sẽ được AuthService kích hoạt sau khi đăng xuất,
         // và AuthService_OnAuthStateChanged sẽ xử lý việc cập nhật UI.
+        Navigation.NavigateTo("/products");
+
     }
 
     public void Dispose()

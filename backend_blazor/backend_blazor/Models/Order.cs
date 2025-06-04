@@ -22,6 +22,9 @@ public class Order
 
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-    // Navigation
+    [MaxLength(450)]
+    [ForeignKey("ApplicationUser")]
+    public string? UserId { get; set; }
+    public ApplicationUser? ApplicationUser { get; set; }
     public ICollection<OrderDetail>? OrderDetails { get; set; }
 }

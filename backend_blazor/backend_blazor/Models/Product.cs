@@ -27,4 +27,5 @@ public class Product
     public Category? Category { get; set; }
 
     public ICollection<OrderDetail>? OrderDetails { get; set; }
+    public ICollection<CartItem>? CartItems { get; set; }
 }

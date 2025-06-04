@@ -17,6 +17,12 @@ namespace BlazorApp2.Services
             return await _httpClient.GetFromJsonAsync<IEnumerable<CartItemDto>>("api/CartItem") 
                    ?? new List<CartItemDto>();
         }
+        
+        public async Task<IEnumerable<CartItemDto>> GetCartItemsByUserIdAsync()
+        {
+            return await _httpClient.GetFromJsonAsync<IEnumerable<CartItemDto>>("api/CartItem/my-cart") 
+                   ?? new List<CartItemDto>();
+        }
 
         public async Task<CartItemDto?> GetCartItemByIdAsync(int id)
         {
@@ -57,6 +63,12 @@ namespace BlazorApp2.Services
                 return await response.Content.ReadFromJsonAsync<OrderDto>();
             }
             return null;
+        }
+        
+        public async Task<IEnumerable<OrderDto>> GetOrdersByUserId()
+        {
+            return await _httpClient.GetFromJsonAsync<IEnumerable<OrderDto>>("api/order/my-orders") 
+                   ?? new List<OrderDto>();
         }
     }
 }

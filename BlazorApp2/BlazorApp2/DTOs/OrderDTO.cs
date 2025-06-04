@@ -8,10 +8,11 @@ public class OrderDto
     public string Name { get; set; } = string.Empty;
     public string Phone { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime CreatedAt { get; set; }
     public string UserId { get; set; } = string.Empty;
-    public ICollection<OrderDetailDto>? OrderDetails { get; set; }
+    public List<ProductDto> OrderDetails { get; set; } = new();
 }
+
 
 // DTO cho việc tạo mới order
 public class CreateOrderDto
