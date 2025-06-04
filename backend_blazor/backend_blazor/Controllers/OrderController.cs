@@ -58,6 +58,16 @@ public class OrderController : ControllerBase
         var order = await _orderService.GetOrdersByUserIdAsync(userId);
         return Ok(order);
     }
-
     
+    [HttpGet("all-orders")]
+    [Authorize(Policy = "AdminOnly")]
+    public async Task<ActionResult<OrderDto>> GetAllOrders()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized(new { message = "Token không hợp lệ!" });
+
+        var order = await _orderService.GetAllOrdersAsync();
+        return Ok(order);
+    }
 } 

@@ -17,5 +17,9 @@ public class OrderService : IOrderService
     {
         return await _orderRepository.GetOrdersByUserIdAsync(userId);
     }
-    
+    public async Task<IEnumerable<OrderDto>> GetAllOrdersAsync()
+    {
+        return await _orderRepository.GetAllOrdersAsync();
+    }
+
 }

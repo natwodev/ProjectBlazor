@@ -31,4 +31,15 @@ public class OrderRepository : IOrderRepository
         return _mapper.Map<IEnumerable<OrderDto>>(orders);
     }
 
+    public async Task<IEnumerable<OrderDto>> GetAllOrdersAsync()
+    {
+        var orders = await _context.Orders
+            .Include(o => o.OrderDetails)
+            .ThenInclude(od => od.Product)
+            .ThenInclude(p => p.Category)  
+            .OrderByDescending(o => o.CreatedAt)
+            .ToListAsync();
+
+        return _mapper.Map<IEnumerable<OrderDto>>(orders);
+    }
 }
