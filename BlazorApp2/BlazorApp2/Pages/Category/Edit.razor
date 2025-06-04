@@ -2,30 +2,40 @@
 @using BlazorApp2.DTOs
 @using BlazorApp2.Services
 @inject CategoryService CategoryService
+@inject AuthService AuthService
 @inject NavigationManager NavigationManager
 
-<h3>Edit Category</h3>
-
-@if (category == null)
+@if (!_isAdmin)
 {
-    <p><em>Loading...</em></p>
+    <div class="alert alert-danger">
+        Bạn không có quyền truy cập trang này.
+    </div>
 }
 else
 {
-    <EditForm Model="category" OnValidSubmit="HandleValidSubmit">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
+    <h3>Edit Category</h3>
 
-        <div>
-            <label>Name:</label>
-            <InputText @bind-Value="category.Name" class="form-control" />
-        </div>
-        <div>
-            <label>Description:</label>
-            <InputText @bind-Value="category.Description" class="form-control" />
-        </div>
-        <button type="submit" class="btn btn-primary">Update</button>
-    </EditForm>
+    @if (category == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <EditForm Model="category" OnValidSubmit="HandleValidSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div>
+                <label>Name:</label>
+                <InputText @bind-Value="category.Name" class="form-control" />
+            </div>
+            <div>
+                <label>Description:</label>
+                <InputText @bind-Value="category.Description" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary">Update</button>
+        </EditForm>
+    }
 }
 
 @code {
@@ -33,9 +43,17 @@ else
     public int id { get; set; }
 
     private UpdateCategoryDto? category;
+    private bool _isAdmin;
 
     protected override async Task OnInitializedAsync()
     {
+        _isAdmin = await AuthService.IsAdmin();
+        if (!_isAdmin)
+        {
+            NavigationManager.NavigateTo("/categories");
+            return;
+        }
+
         var existingCategory = await CategoryService.GetCategoryByIdAsync(id);
         if (existingCategory != null)
         {
@@ -47,7 +65,6 @@ else
         }
         else
         {
-            // Nếu không tìm thấy category, chuyển hướng về danh sách hoặc xử lý khác
             NavigationManager.NavigateTo("/categories");
         }
     }

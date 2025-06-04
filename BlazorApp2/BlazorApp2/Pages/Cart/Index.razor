@@ -1,0 +1,96 @@
+@page "/Cart"
+@using BlazorApp2.DTOs
+@using BlazorApp2.Services
+@inject CartItemService CartItemService
+
+<h3>Your Cart</h3>
+
+@if (cartItems == null)
+{
+    <p>Loading...</p>
+}
+else if (!cartItems.Any())
+{
+    <p>Your cart is empty.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Total</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in cartItems)
+            {
+                <tr>
+                    <td>
+                        <strong>@item.ProductName</strong><br />
+                        @if (item.ProductImage != null)
+                        {
+                            <img src="data:image/png;base64,@Convert.ToBase64String(item.ProductImage)" style="height: 100px; object-fit: cover;" />
+                        }
+                    </td>
+                    <td>
+                        <div class="input-group" style="width: 150px;">
+                            <button class="btn btn-outline-secondary" @onclick="@(() => AdjustQuantity(item, -1))">-</button>
+                            <input type="number" class="form-control text-center" min="1" @bind="item.Quantity" @bind:event="oninput" />
+                            <button class="btn btn-outline-secondary" @onclick="@(() => AdjustQuantity(item, 1))">+</button>
+                        </div>
+                    </td>
+                    <td>@item.Price.ToString("C")</td>
+                    <td>@(item.Price * item.Quantity)</td>
+                    <td>
+                        <button class="btn btn-sm btn-danger" @onclick="@(() => RemoveItem(item.Id))">Remove</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h4>Total: @cartItems.Sum(x => x.Price * x.Quantity).ToString("C")</h4>
+}
+
+@code {
+    private List<CartItemDto>? cartItems;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCart();
+    }
+
+    private async Task LoadCart()
+    {
+        var items = await CartItemService.GetCartItemsAsync();
+        cartItems = items.ToList();
+    }
+
+    private async Task AdjustQuantity(CartItemDto item, int change)
+    {
+        var newQuantity = item.Quantity + change;
+        if (newQuantity < 1) return;
+
+        item.Quantity = newQuantity;
+        var updateDto = new UpdateCartItemDto { Quantity = item.Quantity };
+        var result = await CartItemService.UpdateCartItemQuantityAsync(item.Id, updateDto);
+
+        if (result != null)
+        {
+            item.Quantity = result.Quantity;
+        }
+    }
+
+    private async Task RemoveItem(int id)
+    {
+        var success = await CartItemService.RemoveFromCartAsync(id);
+        if (success)
+        {
+            cartItems = cartItems!.Where(x => x.Id != id).ToList();
+        }
+    }
+}

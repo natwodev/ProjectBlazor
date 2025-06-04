@@ -2,12 +2,16 @@
 @using BlazorApp2.DTOs
 @using BlazorApp2.Services
 @inject CategoryService CategoryService
+@inject AuthService AuthService
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JS
 
 <h3>Categories</h3>
 
-<button class="btn btn-primary mb-3" @onclick="NavigateToCreate">Tạo mới</button>
+@if (_isAdmin)
+{
+    <button class="btn btn-primary mb-3" @onclick="NavigateToCreate">Tạo mới</button>
+}
 
 @if (_categories == null)
 {
@@ -35,8 +39,11 @@ else
                     <td>@category.Description</td>
                     <td>
                         <button class="btn btn-sm btn-primary me-1" @onclick="() => NavigateToView(category.Id)">Chi tiết</button>
-                        <button class="btn btn-sm btn-warning me-1" @onclick="() => NavigateToEdit(category.Id)">Sửa</button>
-                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteCategory(category.Id)">Xoá</button>
+                        @if (_isAdmin)
+                        {
+                            <button class="btn btn-sm btn-warning me-1" @onclick="() => NavigateToEdit(category.Id)">Sửa</button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteCategory(category.Id)">Xoá</button>
+                        }
                     </td>
                 </tr>
             }
@@ -46,9 +53,11 @@ else
 
 @code {
     private List<CategoryDto>? _categories;
+    private bool _isAdmin;
 
     protected override async Task OnInitializedAsync()
     {
+        _isAdmin = await AuthService.IsAdmin();
         await LoadCategoriesAsync();
     }
 

@@ -141,4 +141,10 @@ public class AuthService
             _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
         }
     }
+
+    public async Task<bool> IsAdmin()
+    {
+        var role = await GetUserRoleFromToken();
+        return role == "Admin";
+    }
 }

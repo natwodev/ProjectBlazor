@@ -2,25 +2,46 @@
 @using BlazorApp2.DTOs
 @using BlazorApp2.Services
 @inject CategoryService CategoryService
+@inject AuthService AuthService
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JS
 
-<h3>Thêm danh mục</h3>
+@if (!_isAdmin)
+{
+    <div class="alert alert-danger">
+        Bạn không có quyền truy cập trang này.
+    </div>
+}
+else
+{
+    <h3>Thêm danh mục</h3>
 
-<div class="mb-3">
-    <label for="name" class="form-label">Tên</label>
-    <input id="name" class="form-control" @bind="category.Name" />
-</div>
+    <div class="mb-3">
+        <label for="name" class="form-label">Tên</label>
+        <input id="name" class="form-control" @bind="category.Name" />
+    </div>
 
-<div class="mb-3">
-    <label for="description" class="form-label">Ghi chú</label>
-    <textarea id="description" class="form-control" @bind="category.Description"></textarea>
-</div>
+    <div class="mb-3">
+        <label for="description" class="form-label">Ghi chú</label>
+        <textarea id="description" class="form-control" @bind="category.Description"></textarea>
+    </div>
 
-<button class="btn btn-success" @onclick="SaveCategory">Lưu</button>
+    <button class="btn btn-success" @onclick="SaveCategory">Lưu</button>
+}
 
 @code {
     private CreateCategoryDto category = new();
+    private bool _isAdmin;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isAdmin = await AuthService.IsAdmin();
+        if (!_isAdmin)
+        {
+            NavigationManager.NavigateTo("/categories");
+            return;
+        }
+    }
 
     private async Task SaveCategory()
     {
