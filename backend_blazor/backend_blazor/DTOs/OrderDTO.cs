@@ -7,7 +7,7 @@ public class OrderDTO
     public string Phone { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.Now;
-    public ICollection<OrderDetailDTO>? OrderDetails { get; set; }
+    public ICollection<OrderDetailDto>? OrderDetails { get; set; }
 }
 
 // DTO cho việc tạo mới order
@@ -16,7 +16,7 @@ public class CreateOrderDTO
     public string Name { get; set; } = string.Empty;
     public string Phone { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;
-    public ICollection<CreateOrderDetailDTO> OrderDetails { get; set; } = new List<CreateOrderDetailDTO>();
+    public ICollection<CreateOrderDetailDto> OrderDetails { get; set; } = new List<CreateOrderDetailDto>();
 }
 
 // DTO cho việc cập nhật order

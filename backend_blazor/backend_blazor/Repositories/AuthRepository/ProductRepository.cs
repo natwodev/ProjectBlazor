@@ -18,13 +18,13 @@ public class ProductRepository : IProductRepository
         _mapper = mapper;
     }
     
-    public async Task<IEnumerable<ProductDTO>> GetAllProductDtosAsync()
+    public async Task<IEnumerable<ProductDto>> GetAllProductDtosAsync()
     {
         var products = await _context.Products
             .Include(p => p.Category)
             .ToListAsync();
 
-        return _mapper.Map<IEnumerable<ProductDTO>>(products);
+        return _mapper.Map<IEnumerable<ProductDto>>(products);
     }
 
     
@@ -45,13 +45,13 @@ public class ProductRepository : IProductRepository
         return true;
     }
     
-    public async Task<ProductDTO?> GetProductDtoByIdAsync(int id)
+    public async Task<ProductDto?> GetProductDtoByIdAsync(int id)
     {
         var product = await _context.Products
             .Include(p => p.Category)
             .FirstOrDefaultAsync(p => p.Id == id);
 
-        return product != null ? _mapper.Map<ProductDTO>(product) : null;
+        return product != null ? _mapper.Map<ProductDto>(product) : null;
     }
 
     
@@ -61,12 +61,12 @@ public class ProductRepository : IProductRepository
         return product != null ? _mapper.Map<Product>(product) : null;
     }
     
-    public async Task<ProductDTO> CreateAsync(CreateProductDTO dto)
+    public async Task<ProductDto> CreateAsync(CreateProductDto dto)
     {
         var entity = _mapper.Map<Product>(dto);
         _context.Products.Add(entity);
         await _context.SaveChangesAsync();
-        return _mapper.Map<ProductDTO>(entity);
+        return _mapper.Map<ProductDto>(entity);
     }
     
     

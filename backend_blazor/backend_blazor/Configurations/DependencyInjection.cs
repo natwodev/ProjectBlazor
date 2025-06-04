@@ -18,6 +18,7 @@ namespace backend_blazor.Configurations
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<ICartItemRepository, CartItemRepository>();
 
             
             // Register Services
@@ -25,6 +26,7 @@ namespace backend_blazor.Configurations
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<ICartItemService, CartItemService>();
 
             
         }

@@ -67,7 +67,7 @@ namespace backend_blazor.Authentication.Services
               var roles = await _userRepository.GetUserRolesAsync(user);
               var permissions = await _userRepository.GetUserPermissionsAsync(user);
               // Tạo JWT với thông tin userName, roles và permissions
-              var tokenString = _jwtTokenGenerator.GenerateJwtToken(user.UserName, roles, permissions);
+              var tokenString = _jwtTokenGenerator.GenerateJwtToken(user.Id, roles, permissions);
               return new AuthResultDTO
               {
                   IsSuccess = true,

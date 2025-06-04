@@ -18,7 +18,7 @@ public class Product
     [Column(TypeName = "decimal(10,2)")]
     public decimal Price { get; set; }
 
-    public string? Image { get; set; }
+    public byte[]? Image { get; set; }
 
     // Foreign Key
     public int? CategoryId { get; set; }

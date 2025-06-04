@@ -14,12 +14,23 @@ namespace backend_blazor.Mappings
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
             
-            CreateMap<Product, ProductDTO>()
+            CreateMap<Product, ProductDto>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
-            CreateMap<CreateProductDTO, Product>();
-            CreateMap<UpdateProductDTO, Product>()
+            CreateMap<CreateProductDto, Product>();
+            CreateMap<UpdateProductDto, Product>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
+            CreateMap<OrderDetail, OrderDetailDto>();
+            CreateMap<CreateOrderDetailDto, OrderDetail>();
+            CreateMap<UpdateOrderDetailDto, OrderDetail>()
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<CartItem, CartItemDto>()
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name))
+                .ForMember(dest => dest.ProductImage, opt => opt.MapFrom(src => src.Product.Image));
+            CreateMap<CreateCartItemDto, CartItem>();
+            CreateMap<UpdateCartItemDto, CartItem>()
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
         }
     }
 }

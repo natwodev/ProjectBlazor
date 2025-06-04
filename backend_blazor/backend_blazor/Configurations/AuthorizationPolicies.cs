@@ -17,6 +17,8 @@ namespace backend_blazor.Configurations
             options.AddPolicy("CustomerOnly", policy =>
                 policy.RequireRole("Customer"));
             
+            options.AddPolicy("CustomerOrAdmin", policy =>
+                policy.RequireRole("Customer","Admin"));
         }
     }
 }

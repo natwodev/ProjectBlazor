@@ -16,13 +16,17 @@ public class ProductService : IProductService
         _mapper = mapper;
     }
 
-    public async Task<ProductDTO?> GetByIdAsync(int id)
+    public async Task<ProductDto?> GetByIdAsync(int id)
     {
         return await _productRepository.GetProductDtoByIdAsync(id);
     }
     
-    public async Task<ProductDTO> CreateAsync(CreateProductDTO dto)
+    public async Task<ProductDto> CreateAsync(CreateProductDto dto)
     {
+        dto.Image = !string.IsNullOrEmpty(dto.ImageBase64)
+            ? Convert.FromBase64String(dto.ImageBase64)
+            : null;
+          
         return await _productRepository.CreateAsync(dto);
     }
 
@@ -31,7 +35,7 @@ public class ProductService : IProductService
         return await _productRepository.DeleteProductAsync(id);
     }
     
-    public async Task UpdateAsync(int id, UpdateProductDTO dto)
+    public async Task UpdateAsync(int id, UpdateProductDto dto)
     {
         var product = await _productRepository.GetProductByIdAsync(id);
         if (product == null)
@@ -39,7 +43,6 @@ public class ProductService : IProductService
             throw new Exception("Product not found");
         }
 
-        // Cập nhật từng field nếu có giá trị
         if (dto.Name != null)
             product.Name = dto.Name;
 
@@ -48,6 +51,10 @@ public class ProductService : IProductService
 
         if (dto.Price.HasValue)
             product.Price = dto.Price.Value;
+
+        dto.Image = !string.IsNullOrEmpty(dto.ImageBase64)
+            ? Convert.FromBase64String(dto.ImageBase64)
+            : dto.Image;
 
         if (dto.Image != null)
             product.Image = dto.Image;
@@ -59,7 +66,8 @@ public class ProductService : IProductService
     }
 
 
-    public async Task<IEnumerable<ProductDTO>> GetAllAsync()
+
+    public async Task<IEnumerable<ProductDto>> GetAllAsync()
     {
         return await _productRepository.GetAllProductDtosAsync();
     }
