@@ -14,8 +14,19 @@ builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<CartItemService>();
 
+// Đăng ký AuthHeaderHandler
+builder.Services.AddTransient<AuthHeaderHandler>();
 
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5163/") });
+// Cấu hình HttpClient với AuthHeaderHandler
+builder.Services.AddScoped(sp =>
+{
+    var handler = sp.GetRequiredService<AuthHeaderHandler>();
+    handler.InnerHandler = new HttpClientHandler(); // Thêm inner handler
+    return new HttpClient(handler)
+    {
+        BaseAddress = new Uri("http://localhost:5163/")
+    };
+});
 
 var app = builder.Build();
 

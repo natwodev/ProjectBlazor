@@ -1,0 +1,161 @@
+@page "/checkout"
+@using backend_blazor.DTOs
+@using BlazorApp2.DTOs
+@using BlazorApp2.Services
+@inject CartItemService CartItemService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+@inject AuthService AuthService
+
+<div class="container py-4">
+    <h3>Checkout</h3>
+
+    @if (!_isAuthenticated)
+    {
+        <div class="alert alert-warning">
+            Please <a href="/login">login</a> to complete your order.
+        </div>
+    }
+    else if (cartItems == null)
+    {
+        <p>Loading...</p>
+    }
+    else if (!cartItems.Any())
+    {
+        <div class="alert alert-info">
+            Your cart is empty. <a href="/products">Continue shopping</a>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Shipping Information</h5>
+                        <EditForm Model="orderDto" OnValidSubmit="HandleCheckout">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary />
+
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Full Name</label>
+                                <InputText id="name" class="form-control" @bind-Value="orderDto.Name" />
+                                <ValidationMessage For="@(() => orderDto.Name)" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Phone Number</label>
+                                <InputText id="phone" class="form-control" @bind-Value="orderDto.Phone" />
+                                <ValidationMessage For="@(() => orderDto.Phone)" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="address" class="form-label">Shipping Address</label>
+                                <InputTextArea id="address" class="form-control" @bind-Value="orderDto.Address" />
+                                <ValidationMessage For="@(() => orderDto.Address)" />
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" disabled="@isProcessing">
+                                @if (isProcessing)
+                                {
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <span> Processing...</span>
+                                }
+                                else
+                                {
+                                    <span>Place Order</span>
+                                }
+                            </button>
+                        </EditForm>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Order Summary</h5>
+                        <div class="order-items">
+                            @foreach (var item in cartItems)
+                            {
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>@item.ProductName x @item.Quantity</span>
+                                    <span>@(item.Price * item.Quantity)</span>
+                                </div>
+                            }
+                        </div>
+                        <hr />
+                        <div class="d-flex justify-content-between mb-3">
+                            <strong>Total:</strong>
+                            <strong>@cartItems.Sum(x => x.Price * x.Quantity)</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<CartItemDto>? cartItems;
+    private CreateOrderDto orderDto = new();
+    private bool isProcessing;
+    private bool _isAuthenticated;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isAuthenticated = await AuthService.IsAuthenticated();
+        if (_isAuthenticated)
+        {
+            await LoadCart();
+        }
+    }
+
+    private async Task LoadCart()
+    {
+        var items = await CartItemService.GetCartItemsAsync();
+        cartItems = items.ToList();
+    }
+
+    private async Task HandleCheckout()
+    {
+        if (cartItems == null || !cartItems.Any())
+        {
+            await JS.InvokeVoidAsync("alert", "Your cart is empty!");
+            return;
+        }
+
+        try
+        {
+            isProcessing = true;
+
+            // Convert cart items to order details
+            orderDto.OrderDetails = cartItems.Select(item => new CreateOrderDetailDto
+            {
+                ProductId = item.ProductId,
+                Quantity = item.Quantity,
+                Price = item.Price
+            }).ToList();
+
+            // Call the checkout API
+            var result = await CartItemService.CheckoutAsync(orderDto);
+            if (result != null)
+            {
+                await JS.InvokeVoidAsync("alert", "Order placed successfully!");
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("alert", "Failed to place order. Please try again.");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"Error: {ex.Message}");
+        }
+        finally
+        {
+            isProcessing = false;
+        }
+    }
+} 

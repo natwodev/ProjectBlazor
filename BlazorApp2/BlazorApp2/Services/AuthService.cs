@@ -25,7 +25,6 @@ public class AuthService
 
     public async Task<AuthResultDto> Login(string username, string password)
     {
-        
         try
         {
             var loginModel = new LoginModelDto
@@ -38,7 +37,6 @@ public class AuthService
 
             if (response.IsSuccessStatusCode)
             {
-                // Handle the case where the server returns only the token string within a JSON object
                 var responseContent = await response.Content.ReadAsStringAsync();
                 try
                 {
@@ -50,25 +48,18 @@ public class AuthService
                         {
                             // Lưu token vào localStorage
                             await _jsRuntime.InvokeVoidAsync("localStorage.setItem", TokenKey, token);
-                            // Thêm token vào header mặc định cho các request tiếp theo
-                            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
                             OnAuthStateChanged?.Invoke();
-                            // Return a successful AuthResultDto
                             return new AuthResultDto { IsSuccess = true, Token = token };
                         }
                     }
-
-                    // If token property is not found or not a string, consider it a failure
-                     return new AuthResultDto { IsSuccess = false, ErrorMessage = "Không thể đọc token từ server" };
+                    return new AuthResultDto { IsSuccess = false, ErrorMessage = "Không thể đọc token từ server" };
                 }
                 catch (JsonException)
                 {
-                    // Handle cases where the response is not valid JSON
                     return new AuthResultDto { IsSuccess = false, ErrorMessage = "Phản hồi từ server không hợp lệ." };
                 }
             }
 
-            // Handle non-success status codes (assuming server might return AuthResultDto with error)
             var errorContent = await response.Content.ReadAsStringAsync();
             try
             {
@@ -90,8 +81,6 @@ public class AuthService
     {
         // Xóa token khỏi localStorage
         await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", TokenKey);
-        // Xóa token khỏi header
-        _httpClient.DefaultRequestHeaders.Authorization = null;
         OnAuthStateChanged?.Invoke();
         // Chuyển hướng về trang login
         _navigationManager.NavigateTo("/login");
@@ -121,25 +110,19 @@ public class AuthService
                 return null;
             }
 
-            // Tìm claim 'role'
             var roleClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "role");
-
             return roleClaim?.Value;
         }
         catch
         {
-            // Xử lý lỗi khi đọc token
             return null;
         }
     }
 
     public async Task InitializeAuthState()
     {
-        var token = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", TokenKey);
-        if (!string.IsNullOrEmpty(token))
-        {
-            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-        }
+        // Không cần thêm token vào header nữa vì đã có AuthHeaderHandler
+        OnAuthStateChanged?.Invoke();
     }
 
     public async Task<bool> IsAdmin()

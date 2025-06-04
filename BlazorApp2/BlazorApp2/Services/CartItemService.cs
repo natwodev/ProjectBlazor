@@ -48,5 +48,15 @@ namespace BlazorApp2.Services
             var response = await _httpClient.DeleteAsync($"api/CartItem/{id}");
             return response.IsSuccessStatusCode;
         }
+
+        public async Task<OrderDto?> CheckoutAsync(CreateOrderDto orderDto)
+        {
+            var response = await _httpClient.PostAsJsonAsync("api/Order/checkout", orderDto);
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<OrderDto>();
+            }
+            return null;
+        }
     }
 }

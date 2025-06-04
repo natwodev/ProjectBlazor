@@ -2,9 +2,13 @@
 @using BlazorApp2.DTOs
 @using BlazorApp2.Services
 @inject CartItemService CartItemService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
 
 <h3>Your Cart</h3>
-
+<button class="btn btn-primary create-btn" @onclick="NavigateToList">
+    <i class="fas fa-plus me-2"></i>Quay lại danh sách 
+</button>
 @if (cartItems == null)
 {
     <p>Loading...</p>
@@ -15,45 +19,65 @@ else if (!cartItems.Any())
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Total</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in cartItems)
-            {
-                <tr>
-                    <td>
-                        <strong>@item.ProductName</strong><br />
-                        @if (item.ProductImage != null)
-                        {
-                            <img src="data:image/png;base64,@Convert.ToBase64String(item.ProductImage)" style="height: 100px; object-fit: cover;" />
-                        }
-                    </td>
-                    <td>
-                        <div class="input-group" style="width: 150px;">
-                            <button class="btn btn-outline-secondary" @onclick="@(() => AdjustQuantity(item, -1))">-</button>
-                            <input type="number" class="form-control text-center" min="1" @bind="item.Quantity" @bind:event="oninput" />
-                            <button class="btn btn-outline-secondary" @onclick="@(() => AdjustQuantity(item, 1))">+</button>
-                        </div>
-                    </td>
-                    <td>@item.Price.ToString("C")</td>
-                    <td>@(item.Price * item.Quantity)</td>
-                    <td>
-                        <button class="btn btn-sm btn-danger" @onclick="@(() => RemoveItem(item.Id))">Remove</button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
 
-    <h4>Total: @cartItems.Sum(x => x.Price * x.Quantity).ToString("C")</h4>
+    <div class="row">
+        <div class="col-md-8">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in cartItems)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@item.ProductName</strong><br />
+                                @if (item.ProductImage != null)
+                                {
+                                    <img src="data:image/png;base64,@Convert.ToBase64String(item.ProductImage)" style="height: 100px; object-fit: cover;" />
+                                }
+                            </td>
+                            <td>
+                                <div class="input-group" style="width: 150px;">
+                                    <button class="btn btn-outline-secondary" @onclick="@(() => AdjustQuantity(item, -1))">-</button>
+                                    <input type="number" class="form-control text-center" min="1" @bind="item.Quantity" @bind:event="oninput" />
+                                    <button class="btn btn-outline-secondary" @onclick="@(() => AdjustQuantity(item, 1))">+</button>
+                                </div>
+                            </td>
+                            <td>@item.Price</td>
+                            <td>@(item.Price * item.Quantity)</td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" @onclick="@(() => RemoveItem(item.Id))">Remove</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Order Summary</h5>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal:</span>
+                        <span>@cartItems.Sum(x => x.Price * x.Quantity).ToString("C")</span>
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong>Total:</strong>
+                        <strong>@cartItems.Sum(x => x.Price * x.Quantity).ToString("C")</strong>
+                    </div>
+                    <button class="btn btn-primary w-100" @onclick="NavigateToCheckout">Proceed to Checkout</button>
+                </div>
+            </div>
+        </div>
+    </div>
 }
 
 @code {
@@ -92,5 +116,14 @@ else
         {
             cartItems = cartItems!.Where(x => x.Id != id).ToList();
         }
+    }
+    private void NavigateToList()
+    {
+        NavigationManager.NavigateTo($"/products");
+    }
+
+    private void NavigateToCheckout()
+    {
+        NavigationManager.NavigateTo("/checkout");
     }
 }
